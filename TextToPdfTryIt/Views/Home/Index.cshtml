@@ -1,26 +1,30 @@
 ﻿@{
-    ViewBag.Title = "Try-It: TXT ➜ PDF";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = null;
 }
 
-@section HeadScripts {
-    <!-- React, ReactDOM, Babel -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text to PDF</title>
+
+    <!-- React & Babel -->
     <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js"></script>
+
     <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-}
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
 
-<div class="flex items-center justify-center min-h-screen bg-gray-100">
     <div id="root" class="w-full max-w-md"></div>
-</div>
 
-@section Scripts {
     <script type="text/babel">
         const { useState, useRef } = React;
 
-        function App() {
+        function TxtToPdfApp() {
           const fileInput = useRef(null);
           const [errorMsg, setErrorMsg]       = useState('');
           const [downloadUrl, setDownloadUrl] = useState('');
@@ -65,7 +69,7 @@
 
           return (
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h1 className="text-2xl font-bold mb-4">Try-It: TXT ➜ PDF</h1>
+              <h1 className="text-2xl font-bold mb-4">Text to PDF</h1>
 
               <input
                 type="file"
@@ -80,8 +84,9 @@
               <button
                 onClick={handleConvert}
                 disabled={uploading}
-                className={`mt-4 w-full text-white py-2 rounded-md
-                           ${uploading ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                className={`mt-4 w-full text-white py-2 rounded-md ${
+                  uploading ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'
+                }`}
               >
                 {uploading ? 'Uploading…' : 'Upload & Convert'}
               </button>
@@ -106,6 +111,7 @@
           );
         }
 
-        ReactDOM.render(<App />, document.getElementById('root'));
+        ReactDOM.render(<TxtToPdfApp />, document.getElementById('root'));
     </script>
-}
+</body>
+</html>
