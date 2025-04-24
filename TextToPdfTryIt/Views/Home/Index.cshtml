@@ -1,61 +1,111 @@
 ﻿@{
-    ViewBag.Title = "Try‑It: TXT ➜ PDF";
+    ViewBag.Title = "Try-It: TXT ➜ PDF";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h2>TXT ➜ PDF Try‑It</h2>
 
-<div class="card p-3">
-    <input type="file"
-           id="fileInput"
-           accept=".txt,text/plain"
-           class="form-control" />
-    <button id="uploadBtn" class="btn btn-primary mt-2">Upload &amp; Convert</button>
+@section HeadScripts {
+    <!-- React, ReactDOM, Babel -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js"></script>
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+}
 
-    <a id="downloadLink" class="btn btn-success mt-3 d-none" download="Generated.pdf">
-        Download PDF
-    </a>
-    <div id="msg" class="mt-2 text-danger"></div>
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div id="root" class="w-full max-w-md"></div>
 </div>
 
-<script>
-    const fileInput = document.getElementById('fileInput');
-    const btn       = document.getElementById('uploadBtn');
-    const link      = document.getElementById('downloadLink');
-    const msg       = document.getElementById('msg');
+@section Scripts {
+    <script type="text/babel">
+        const { useState, useRef } = React;
 
-    btn.addEventListener('click', async () => {
-        msg.textContent = '';
-        link.classList.add('d-none');
+        function App() {
+          const fileInput = useRef(null);
+          const [errorMsg, setErrorMsg]       = useState('');
+          const [downloadUrl, setDownloadUrl] = useState('');
+          const [uploading, setUploading]     = useState(false);
 
-        const file = fileInput.files[0];
-        if (!file) { msg.textContent = 'Pick a file first.'; return; }
+          async function handleConvert() {
+            setErrorMsg('');
+            setDownloadUrl('');
+            const file = fileInput.current.files[0];
+            if (!file) {
+              setErrorMsg('Pick a file first.');
+              return;
+            }
+            if (file.type !== 'text/plain' && !file.name.endsWith('.txt')) {
+              setErrorMsg('Only .txt files are accepted.');
+              return;
+            }
 
-        if (file.type !== 'text/plain' && !file.name.endsWith('.txt')) {
-            msg.textContent = 'Only .txt chunk files are accepted.';
-            return;
-        }
+            const fd = new FormData();
+            fd.append('file', file);
 
-
-        const fd = new FormData();
-        fd.append('file', file);
-
-        btn.disabled = true; btn.textContent = 'Uploading…';
-        try {
-            const resp = await fetch('/api/pdf/convert-file', {
+            setUploading(true);
+            try {
+              const resp = await fetch('/api/pdf/convert-file', {
                 method: 'POST',
                 body: fd
-            });
-            if (!resp.ok) throw new Error(await resp.text());
+              });
+              if (!resp.ok) {
+                const text = await resp.text();
+                throw new Error(text || 'Conversion failed');
+              }
 
-            const blob = await resp.blob();
-            const url  = URL.createObjectURL(blob);
+              const blob = await resp.blob();
+              const url  = URL.createObjectURL(blob);
+              setDownloadUrl(url);
+            } catch (e) {
+              setErrorMsg(e.message);
+            } finally {
+              setUploading(false);
+            }
+          }
 
-            link.href = url;
-            link.classList.remove('d-none');
-        } catch (e) {
-            msg.textContent = e.message;
-        } finally {
-            btn.disabled = false; btn.textContent = 'Upload & Convert';
+          return (
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h1 className="text-2xl font-bold mb-4">Try-It: TXT ➜ PDF</h1>
+
+              <input
+                type="file"
+                accept=".txt,text/plain"
+                ref={fileInput}
+                className="block w-full text-gray-700 file:mr-4 file:py-2 file:px-4
+                           file:rounded-md file:border-0 file:text-sm
+                           file:bg-indigo-50 file:text-indigo-700
+                           hover:file:bg-indigo-100"
+              />
+
+              <button
+                onClick={handleConvert}
+                disabled={uploading}
+                className={`mt-4 w-full text-white py-2 rounded-md
+                           ${uploading ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+              >
+                {uploading ? 'Uploading…' : 'Upload & Convert'}
+              </button>
+
+              {downloadUrl && (
+                <a
+                  href={downloadUrl}
+                  download="Generated.pdf"
+                  className="mt-4 inline-block w-full text-center bg-green-600 hover:bg-green-700
+                             text-white py-2 rounded-md"
+                >
+                  Download PDF
+                </a>
+              )}
+
+              {errorMsg && (
+                <p className="mt-4 text-red-600 text-center">
+                  {errorMsg}
+                </p>
+              )}
+            </div>
+          );
         }
-    });
-</script>
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+}
