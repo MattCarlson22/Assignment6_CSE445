@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+ <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+    <!--───────── VS debug behaviour ─────────-->
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files\IIS Express\iisexpress.exe</StartProgram>
+    <StartArguments>/path:"$(ProjectDir)" /port:61270 /trace:error</StartArguments>
+    <StartWorkingDirectory>$(ProjectDir)</StartWorkingDirectory>
+
+    <!-- make VS pop a browser -->
+    <StartBrowser>true</StartBrowser>
+    <StartURL>http://localhost:61270/index.html</StartURL>
+
+    <!-- break *inside* VS on *any* unhandled CLR exception
+         instead of letting IIS-Express terminate → you’ll see the real stack-trace -->
+    <DebuggerBreakOnUnhandled>true</DebuggerBreakOnUnhandled>
+  </PropertyGroup>
+
+  <!-- build-time reference assemblies for .NET 4.7.2 -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472"
+                      Version="1.0.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform"
+                      Version="2.0.1" />
+  </ItemGroup>
+
+  <!-- WCF assemblies your code needs -->
+  <ItemGroup>
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Runtime.Serialization" />
+  </ItemGroup>
+
+  <!-- Static / content files -->
+  <ItemGroup>
+    <Content Include="index.html" />
+    <Content Include="TextChunkService.xml" />
+    <Content Include="TextChunkService.svc" />
+    <None Include="Web.config"          CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+</Project>

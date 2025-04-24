@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "TextChunkEditor – IIS Express": {
+      "commandName": "Executable", // run any EXE
+      "executablePath": "C:\\Program Files\\IIS Express\\iisexpress.exe",
+      "workingDirectory": "$(ProjectDir)",
+      "commandLineArgs": "/path:\"$(ProjectDir)\" /port:61270",
+      "launchBrowser": true, // ← open browser
+      "launchUrl": "index.html" // ← page to open
+    }
+  }
+}

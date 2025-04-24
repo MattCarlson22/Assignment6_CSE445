@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Editor</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+                const { useState } = React;
+
+                function App() {
+                  // defintions
+                  const [chunks, setChunks] = useState([]);
+                  const [fileName, setFileName] = useState('');
+                  const [errorMsg, setErrorMsg] = useState('');
+
+                  // upload checks
+                  function onFileUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) {
+                      setErrorMsg('Invalid file');
+                      return;
+                    }
+                    if (!file.name.endsWith('.txt')) {
+                      setErrorMsg('.txt extention required');
+                      return;
+                    }
+                    // size check
+                    if (file.size > 1024 * 1024) {
+                      setErrorMsg('Max file size is 1MB.');
+                      return;
+                    }
+
+                    setFileName(file.name);
+                    setErrorMsg('');
+
+                    // read file
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                      const content = e.target.result;
+                      // parse file
+                      const parsed = parseFile(content);
+                      if (parsed.length === 0) {
+                        setErrorMsg('No chunks found in file. Check format!');
+                      } else {
+                        setChunks(parsed);
+                      }
+                    };
+                    reader.onerror = function() {
+                      setErrorMsg('Could not read file.');
+                    };
+                    reader.readAsText(file);
+                  }
+
+                  // chunk file content
+                  function parseFile(content) {
+                    const chunks = [];
+                    const lines = content.split('\n').filter(line => line.trim() !== '');
+                    let currentPage = 0;
+                    let chunk = null;
+
+                    for (let i = 0; i < lines.length; i++) {
+                      const line = lines[i].trim();
+
+                      // page line check
+                      if (line.startsWith('=== Page')) {
+                        currentPage = parseInt(line.split(' ')[2], 10);
+                        continue;
+                      }
+
+                      // parse 'Text'
+                      if (line.startsWith('Text:')) {
+                        if (chunk && chunk.text && chunk.position && chunk.fontSize) {
+                          chunks.push(chunk);
+                        }
+
+                        chunk = { page: currentPage, text: line.replace('Text: ', '') };
+                        continue;
+                      }
+
+                      // parse 'Position'
+                      if (line.startsWith('Position:')) {
+                        const parts = line.match(/X: ([\d.]+),\s*Y: ([\d.]+)/);
+                        if (parts && chunk) {
+                          chunk.position = {
+                            x: parseFloat(parts[1]) || 0,
+                            y: parseFloat(parts[2]) || 0
+                          };
+                        }
+                        continue;
+                      }
+
+                      // parse 'Font'
+                      if (line.startsWith('Font:')) {
+                        if (chunk) {
+                          chunk.font = line.replace('Font: ', '') || 'Unknown';
+                        }
+                        continue;
+                      }
+
+                      // parse 'Font Size'
+                      if (line.startsWith('Font Size:')) {
+                        const size = parseFloat(line.split(' ')[2]);
+                        if (chunk) {
+                          chunk.fontSize = size || 0;
+                        }
+                        continue;
+                      }
+
+                      // parse 'Color'
+                      if (line.startsWith('Color:')) {
+                        if (chunk) {
+                          chunk.color = line.replace('Color: ', '') || 'Unknown';
+                          if (chunk.text && chunk.position && chunk.fontSize) {
+                            chunks.push(chunk);
+                          }
+                          chunk = null;
+                        }
+                        continue;
+                      }
+                    }
+                    if (chunk && chunk.text && chunk.position && chunk.fontSize) {
+                      chunks.push(chunk);
+                    }
+
+                    return chunks;
+                  }
+
+                  function changeText(index, newText) {
+                    const newChunks = [...chunks];
+                    newChunks[index].text = newText;
+                    setChunks(newChunks);
+                  }
+
+                  // delete function
+                  function deleteChunk(index) {
+                    const newChunks = [...chunks];
+                    newChunks.splice(index, 1);
+                    setChunks(newChunks);
+                  }
+
+                  function saveFile() {
+                    if (chunks.length === 0) {
+                      setErrorMsg('Nothing to save!');
+                      return;
+                    }
+
+                    // build file content
+                    let output = '';
+                    let currentPage = 0;
+                    for (let i = 0; i < chunks.length; i++) {
+                      const chunk = chunks[i];
+                      if (chunk.page !== currentPage) {
+                        currentPage = chunk.page;
+                        output += '=== Page ' + currentPage + ' ===\n';
+                      }
+                      output += 'Text: ' + chunk.text + '\n';
+                      output += '  Position: (X: ' + chunk.position.x.toFixed(2) + ', Y: ' + chunk.position.y.toFixed(2) + ')\n';
+                      output += '  Font: ' + (chunk.font || 'Unknown') + '\n';
+                      output += '  Font Size: ' + chunk.fontSize.toFixed(2) + ' pt\n';
+                      output += '  Color: ' + (chunk.color || 'Unknown') + '\n\n';
+                    }
+
+                    // create a downloadable file
+                    const blob = new Blob([output], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'modified_' + (fileName || 'textchunks.txt');
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }
+
+                  // UI
+                  return (
+                    <div className="container mx-auto p-4">
+                      <h1 className="text-2xl font-bold mb-4">Text Chunk Editor</h1>
+                      <pre>
+                        Text Chunks are in the following format:
+                          Text:
+                          Position:
+                          Font:
+                          Font Size:
+                          Color:
+                      </pre>
+
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Upload a .txt file:
+                        </label>
+                        <input
+                          type="file"
+                          accept=".txt"
+                          onChange={onFileUpload}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                        />
+                      </div>
+
+                      {errorMsg ? (
+                        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">
+                          {errorMsg}
+                        </div>
+                      ) : null}
+
+                      {chunks.length > 0 ? (
+                        <div>
+                          <h2 className="text-xl font-semibold mb-4">Chunks ({chunks.length})</h2>
+                          {chunks.map(function(chunk, index) {
+                            return (
+                              <div key={index} className="bg-white p-4 mb-4 rounded-lg shadow">
+                                <div className="flex justify-between items-center mb-2">
+                                  <h3 className="text-lg font-semibold">Chunk {index + 1} (Page {chunk.page})</h3>
+                                  <button
+                                    onClick={function() { deleteChunk(index); }}
+                                    className="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                                <div className="mb-2">
+                                  <label className="block text-sm font-medium text-gray-700">Text:</label>
+                                  <input
+                                    type="text"
+                                    value={chunk.text}
+                                    onChange={function(e) { changeText(index, e.target.value); }}
+                                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                  />
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  <p>Position: (X: {chunk.position.x.toFixed(2)}, Y: {chunk.position.y.toFixed(2)})</p>
+                                  <p>Font: {chunk.font || 'N/A'}</p>
+                                  <p>Font Size: {chunk.fontSize.toFixed(2)} pt</p>
+                                  <p>Color: {chunk.color || 'N/A'}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          <button
+                            onClick={saveFile}
+                            className="mt-4 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700"
+                          >
+                            Save File
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-gray-600">Upload a file to edit chunks.</p>
+                      )}<div className="mt-8 p-4 bg-gray-50 border border-gray-300 rounded-md">
+                    <h2 className="text-lg font-semibold mb-2">Example Text Chunk Format</h2>
+                    <p className="text-gray-600 mb-2">
+                      Below is an example of how your .txt file should be formatted. If no page marker (e.g., === Page 1 ===) is provided, chunks are assumed to be on page 1.
+                    </p>
+                    <pre className="bg-white p-4 rounded-md border border-gray-200 text-sm text-gray-800">
+        Text: Test <br></br>
+          Position: (X: 440.69, Y: 300.60)<br></br>
+          Font: AAAAAA+ArialMT<br></br>
+          Font Size: 16.00 pt<br></br>
+          Color: RGB(0, 0, 0)<br></br>
+        <br></br>
+        Text: PDF<br></br>
+          Position: (X: 440.69, Y: 310.60)<br></br>
+          Font: AAAAAA+ArialMT<br></br>
+          Font Size: 16.00 pt<br></br>
+          Color: RGB(0, 0, 0)<br></br>
+                    </pre>
+                  </div>
+                </div>
+              );
+            }
+
+                // reactdom the goat
+                ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPIStuff", "WebAPIStuff\WebAPIStuff.csproj", "{15921907-8C14-4B9A-AEA1-185C80B8616D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToPdfService", "TextToPdfTryIt\TextToPdfService.csproj", "{7E316C33-2FD2-4ACE-862F-ACAFA7893B61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextChunkEditorService", "TextChunkEditor\TextChunkEditorService.csproj", "{0F539CE5-89C6-44E4-BA16-B10C9AB7CA27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextChunkEditor", "TextChunkEditor\TextChunkEditor.csproj", "{81B9C77A-B21C-4464-940F-1030A020E399}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{15921907-8C14-4B9A-AEA1-185C80B8616D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15921907-8C14-4B9A-AEA1-185C80B8616D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15921907-8C14-4B9A-AEA1-185C80B8616D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15921907-8C14-4B9A-AEA1-185C80B8616D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E316C33-2FD2-4ACE-862F-ACAFA7893B61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E316C33-2FD2-4ACE-862F-ACAFA7893B61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E316C33-2FD2-4ACE-862F-ACAFA7893B61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E316C33-2FD2-4ACE-862F-ACAFA7893B61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F539CE5-89C6-44E4-BA16-B10C9AB7CA27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F539CE5-89C6-44E4-BA16-B10C9AB7CA27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F539CE5-89C6-44E4-BA16-B10C9AB7CA27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F539CE5-89C6-44E4-BA16-B10C9AB7CA27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81B9C77A-B21C-4464-940F-1030A020E399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81B9C77A-B21C-4464-940F-1030A020E399}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81B9C77A-B21C-4464-940F-1030A020E399}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81B9C77A-B21C-4464-940F-1030A020E399}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

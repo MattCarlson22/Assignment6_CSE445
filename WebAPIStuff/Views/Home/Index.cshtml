@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "PDF to Text Converter";
+}
+<h2>PDF to Text Converter</h2>
+<p>Upload a PDF file to convert its text content.</p>
+<form action="/api/pdf/to-text" method="post" enctype="multipart/form-data">
+    <div>
+        <label for="file">Select PDF:</label>
+        <input type="file" name="file" accept=".pdf" required />
+    </div>
+    <div>
+        <label for="includeFormatting">Include Formatting (position, font, color):</label>
+        <input type="checkbox" name="includeFormatting" value="true" />
+    </div>
+    <button type="submit">Convert to Text</button>
+</form>

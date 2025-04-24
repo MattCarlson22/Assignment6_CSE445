@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>TextChunkEditorService</RootNamespace>
+    <AssemblyName>TextChunkEditorService</AssemblyName>
+    <UseIIS>true</UseIIS>
+    <UseIISExpress>true</UseIISExpress>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Runtime.Serialization" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TextChunkService.svc" />
+    <Content Include="Web.config" />
+  </ItemGroup>
+</Project>
